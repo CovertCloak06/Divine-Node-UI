@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Divine Node UI - Project Import</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Divine Node UI</h1>
+            <p class="subtitle">AI/OSINT Tool Interface</p>
+        </header>
+        
+        <main>
+            <section class="import-section">
+                <h2>Import Project</h2>
+                
+                <div class="input-group">
+                    <label for="projectPath">Project Directory Path:</label>
+                    <input 
+                        type="text" 
+                        id="projectPath" 
+                        value="/sdcard/pkn"
+                        placeholder="/sdcard/pkn"
+                    >
+                    <button onclick="loadProjects()" class="btn btn-primary">
+                        Browse Projects
+                    </button>
+                </div>
+                
+                <div id="projectList" class="project-list" style="display: none;">
+                    <h3>Available Projects</h3>
+                    <div id="projectsContainer"></div>
+                </div>
+                
+                <div id="projectDetails" class="project-details" style="display: none;">
+                    <h3>Project Details</h3>
+                    <div id="detailsContainer"></div>
+                </div>
+                
+                <div id="errorMessage" class="error-message" style="display: none;"></div>
+                <div id="successMessage" class="success-message" style="display: none;"></div>
+            </section>
+        </main>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>
