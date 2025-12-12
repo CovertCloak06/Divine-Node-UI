@@ -1,0 +1,59 @@
+{
+  "name": "divine-node-ui",
+  "version": "1.0.0",
+  "description": "Custom AI/OSINT tool with multiplatform support",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac",
+    "build:linux": "electron-builder --linux",
+    "test": "echo \"No tests yet\" && exit 0"
+  },
+  "keywords": [
+    "osint",
+    "ai",
+    "electron",
+    "intelligence",
+    "reconnaissance"
+  ],
+  "author": "CovertCloak06",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^27.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "dependencies": {
+    "axios": "^1.6.2",
+    "node-fetch": "^3.3.2"
+  },
+  "build": {
+    "appId": "com.divine.node-ui",
+    "productName": "Divine Node UI",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "assets/icon.icns"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "icon": "assets/icon.png",
+      "category": "Utility"
+    }
+  }
+}
