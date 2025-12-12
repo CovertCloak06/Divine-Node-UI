@@ -1,12 +1,21 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs').promises;
+const rateLimit = require('express-rate-limit');
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Rate limiting middleware
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: 'Too many requests from this IP, please try again later.'
+});
 
 // Middleware
 app.use(express.json());
 app.use(express.static('public'));
+app.use('/api/', apiLimiter);
 
 // Security: Validate and sanitize paths to prevent directory traversal
 function validatePath(userPath) {
