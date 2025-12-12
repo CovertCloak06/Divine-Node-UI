@@ -22,7 +22,7 @@
   "author": "CovertCloak06",
   "license": "MIT",
   "devDependencies": {
-    "electron": "^27.0.0",
+    "electron": "^39.2.7",
     "electron-builder": "^24.9.1"
   },
   "dependencies": {
