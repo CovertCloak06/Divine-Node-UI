@@ -129,13 +129,19 @@ function displayProjectDetails(project) {
         `;
     }).join('');
     
+    const truncatedWarning = project.truncated ? 
+        `<div style="background: #fff3cd; color: #856404; padding: 10px; border-radius: 4px; margin-bottom: 15px;">
+            <strong>Note:</strong> Showing ${files.length} of ${project.totalFiles} files. Some files were not loaded for performance reasons.
+        </div>` : '';
+    
     detailsContainer.innerHTML = `
         <div style="margin-bottom: 15px;">
             <strong>Project Path:</strong> ${escapeHtml(project.projectPath)}
         </div>
         <div style="margin-bottom: 15px;">
-            <strong>Files Found:</strong> ${files.length}
+            <strong>Files Found:</strong> ${project.totalFiles || files.length}
         </div>
+        ${truncatedWarning}
         <div>
             <h4 style="margin-bottom: 10px;">Project Contents:</h4>
             ${fileList || '<p>No files found</p>'}

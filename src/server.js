@@ -19,13 +19,20 @@ app.use('/api/', apiLimiter);
 
 // Security: Validate and sanitize paths to prevent directory traversal
 function validatePath(userPath) {
-  // Resolve the path to prevent directory traversal
+  // Resolve the path to get absolute path
   const resolvedPath = path.resolve(userPath);
   
-  // Check if path contains suspicious patterns
+  // Check if original path contains suspicious patterns
   if (userPath.includes('..') || userPath.includes('~')) {
     throw new Error('Invalid path: directory traversal detected');
   }
+  
+  // For production, you should also check that the resolved path
+  // starts with an allowed base directory, for example:
+  // const allowedBase = '/sdcard/pkn';
+  // if (!resolvedPath.startsWith(allowedBase)) {
+  //   throw new Error('Access denied: path outside allowed directory');
+  // }
   
   return resolvedPath;
 }
@@ -85,10 +92,15 @@ app.post('/api/import', async (req, res) => {
       });
     }
     
-    // Read project files
+    // Read project files (limit concurrent reads for memory safety)
     const files = await fs.readdir(validatedPath, { withFileTypes: true });
+    
+    // Limit the number of files processed to prevent memory issues
+    const maxFiles = 100;
+    const filesToProcess = files.slice(0, maxFiles);
+    
     const projectFiles = await Promise.all(
-      files.map(async (file) => {
+      filesToProcess.map(async (file) => {
         const filePath = path.join(validatedPath, file.name);
         if (file.isFile()) {
           try {
@@ -144,7 +156,9 @@ app.post('/api/import', async (req, res) => {
     res.json({ 
       success: true,
       projectPath: validatedPath,
-      files: projectFiles.filter(f => f !== undefined)
+      files: projectFiles.filter(f => f !== undefined),
+      totalFiles: files.length,
+      truncated: files.length > maxFiles
     });
   } catch (error) {
     res.status(500).json({ 
