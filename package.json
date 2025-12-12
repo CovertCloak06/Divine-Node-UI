@@ -2,7 +2,7 @@
   "name": "divine-node-ui",
   "version": "1.0.0",
   "description": "Custom Interface for AI/OSINT tool with project import functionality",
-  "main": "src/index.js",
+  "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
     "dev": "node src/server.js"

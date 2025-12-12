@@ -8,12 +8,28 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static('public'));
 
+// Security: Validate and sanitize paths to prevent directory traversal
+function validatePath(userPath) {
+  // Resolve the path to prevent directory traversal
+  const resolvedPath = path.resolve(userPath);
+  
+  // Check if path contains suspicious patterns
+  if (userPath.includes('..') || userPath.includes('~')) {
+    throw new Error('Invalid path: directory traversal detected');
+  }
+  
+  return resolvedPath;
+}
+
 // API endpoint to list projects from a directory
 app.get('/api/projects', async (req, res) => {
   const projectDir = req.query.path || '/sdcard/pkn';
   
   try {
-    const exists = await fs.access(projectDir).then(() => true).catch(() => false);
+    // Validate and sanitize path
+    const validatedPath = validatePath(projectDir);
+    
+    const exists = await fs.access(validatedPath).then(() => true).catch(() => false);
     
     if (!exists) {
       return res.status(404).json({ 
@@ -22,15 +38,15 @@ app.get('/api/projects', async (req, res) => {
       });
     }
     
-    const files = await fs.readdir(projectDir, { withFileTypes: true });
+    const files = await fs.readdir(validatedPath, { withFileTypes: true });
     const projects = files
       .filter(file => file.isDirectory())
       .map(dir => ({
         name: dir.name,
-        path: path.join(projectDir, dir.name)
+        path: path.join(validatedPath, dir.name)
       }));
     
-    res.json({ projects, directory: projectDir });
+    res.json({ projects, directory: validatedPath });
   } catch (error) {
     res.status(500).json({ 
       error: 'Failed to read directory',
@@ -48,7 +64,10 @@ app.post('/api/import', async (req, res) => {
   }
   
   try {
-    const exists = await fs.access(projectPath).then(() => true).catch(() => false);
+    // Validate and sanitize path
+    const validatedPath = validatePath(projectPath);
+    
+    const exists = await fs.access(validatedPath).then(() => true).catch(() => false);
     
     if (!exists) {
       return res.status(404).json({ 
@@ -58,13 +77,37 @@ app.post('/api/import', async (req, res) => {
     }
     
     // Read project files
-    const files = await fs.readdir(projectPath, { withFileTypes: true });
+    const files = await fs.readdir(validatedPath, { withFileTypes: true });
     const projectFiles = await Promise.all(
       files.map(async (file) => {
-        const filePath = path.join(projectPath, file.name);
+        const filePath = path.join(validatedPath, file.name);
         if (file.isFile()) {
           try {
-            const content = await fs.readFile(filePath, 'utf-8');
+            // Only attempt to read text files, limit size for security
+            const stats = await fs.stat(filePath);
+            const maxSize = 1024 * 1024; // 1MB limit
+            
+            if (stats.size > maxSize) {
+              return {
+                name: file.name,
+                path: filePath,
+                type: 'file',
+                error: 'File too large to display'
+              };
+            }
+            
+            // Try to read as text, catch encoding errors
+            const content = await fs.readFile(filePath, 'utf-8').catch(() => null);
+            
+            if (content === null) {
+              return {
+                name: file.name,
+                path: filePath,
+                type: 'file',
+                error: 'Binary file or encoding error'
+              };
+            }
+            
             return {
               name: file.name,
               path: filePath,
@@ -91,7 +134,7 @@ app.post('/api/import', async (req, res) => {
     
     res.json({ 
       success: true,
-      projectPath,
+      projectPath: validatedPath,
       files: projectFiles.filter(f => f !== undefined)
     });
   } catch (error) {
