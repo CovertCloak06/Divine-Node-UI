@@ -7,6 +7,11 @@ Custom Interface for my AI/OSINT tool
 - Browse and select projects from the specified directory
 - View project contents and file structure
 - Clean, responsive web interface
+- **Security Features**:
+  - Rate limiting to prevent API abuse
+  - Path validation to prevent directory traversal attacks
+  - File size limits (1MB max per file)
+  - Binary file detection and safe handling
 
 ## Installation
 
@@ -90,6 +95,17 @@ Import a specific project.
 
 - **Default Project Directory**: `/sdcard/pkn`
 - **Server Port**: 3000 (configurable via PORT environment variable)
+- **Rate Limit**: 100 requests per 15 minutes per IP
+- **Max File Size**: 1MB per file for display
+
+## Security
+
+This application implements several security measures:
+
+1. **Rate Limiting**: API endpoints are protected against abuse with a limit of 100 requests per 15 minutes per IP address
+2. **Path Validation**: All user-provided paths are validated and sanitized to prevent directory traversal attacks
+3. **File Size Limits**: Files larger than 1MB are not read into memory to prevent DoS attacks
+4. **Binary File Handling**: Binary files are detected and handled safely without attempting to decode them as text
 
 ## License
 
