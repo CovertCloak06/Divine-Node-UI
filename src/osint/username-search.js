@@ -3,7 +3,7 @@ async function performUsernameSearch(username) {
         // List of platforms to check
         const platforms = [
             { name: 'GitHub', url: `https://github.com/${username}`, checkUrl: `https://api.github.com/users/${username}` },
-            { name: 'Twitter/X', url: `https://twitter.com/${username}`, checkUrl: null },
+            { name: 'Twitter', url: `https://twitter.com/${username}`, checkUrl: null },
             { name: 'Instagram', url: `https://instagram.com/${username}`, checkUrl: null },
             { name: 'Reddit', url: `https://reddit.com/user/${username}`, checkUrl: `https://www.reddit.com/user/${username}/about.json` },
             { name: 'YouTube', url: `https://youtube.com/@${username}`, checkUrl: null },
@@ -50,13 +50,13 @@ async function performUsernameSearch(username) {
 
         // For other platforms, we can't easily check without APIs, so we list them as potential
         const otherPlatforms = [
-            'Twitter/X', 'Instagram', 'YouTube', 'TikTok', 'LinkedIn', 
+            'Twitter', 'Instagram', 'YouTube', 'TikTok', 'LinkedIn', 
             'Facebook', 'Twitch', 'Medium', 'Pinterest', 'Tumblr', 
             'Snapchat', 'Telegram'
         ];
 
         otherPlatforms.forEach(platform => {
-            const platformData = platforms.find(p => p.name === platform);
+            const platformData = platforms.find(p => p.name === platform || p.name.includes(platform));
             results.push({
                 name: platform,
                 url: platformData?.url,

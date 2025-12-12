@@ -66,19 +66,43 @@ async function queryOllama(query, ollamaUrl) {
 Help users understand and use OSINT tools effectively. Provide clear, concise, and accurate information.
 Focus on ethical OSINT practices and legal considerations.`;
 
-        const response = await fetch(`${ollamaUrl}/api/generate`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                model: 'llama2',  // Default model, user can change
-                prompt: `${systemPrompt}\n\nUser: ${query}\nAssistant:`,
-                stream: false
-            })
+        const postData = JSON.stringify({
+            model: 'llama2',  // Default model, user can change
+            prompt: `${systemPrompt}\n\nUser: ${query}\nAssistant:`,
+            stream: false
         });
 
-        const data = await response.json();
+        const response = await new Promise((resolve, reject) => {
+            const options = {
+                hostname: ollamaUrl.replace('http://', '').split(':')[0],
+                port: ollamaUrl.split(':')[2] || 11434,
+                path: '/api/generate',
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Content-Length': Buffer.byteLength(postData)
+                }
+            };
+
+            const req = http.request(options, (res) => {
+                let data = '';
+                res.on('data', chunk => data += chunk);
+                res.on('end', () => {
+                    try {
+                        resolve(JSON.parse(data));
+                    } catch (e) {
+                        reject(new Error('Invalid JSON response from Ollama'));
+                    }
+                });
+            });
+
+            req.on('error', reject);
+            req.write(postData);
+            req.end();
+        });
+
         return {
-            response: data.response || 'No response from Ollama',
+            response: response.response || 'No response from Ollama',
             provider: 'ollama'
         };
     } catch (error) {

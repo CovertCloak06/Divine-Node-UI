@@ -241,7 +241,13 @@ async function sendAIQuery() {
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
     try {
-        const result = await ipcRenderer.invoke('ai:query', query, {});
+        // Get settings from localStorage
+        const context = {
+            openaiKey: localStorage.getItem('openai-key'),
+            ollamaUrl: localStorage.getItem('ollama-url') || 'http://localhost:11434'
+        };
+        
+        const result = await ipcRenderer.invoke('ai:query', query, context);
         
         // Remove loading message
         messagesDiv.removeChild(loadingMessage);
